@@ -4,7 +4,8 @@
 #include<semaphore.h>
 #include<time.h>
 
-pthread_t t1,t2,t3,t4,t5,t6;
+struct tm *t6;time_t t;
+pthread_t thread_1,thread_2,thread_3,thread_4,thread_5,thread_6;
 pthread_mutex_t l1,l2;
 int x,pcnt=0,teach=0,stud=0,staff=0,h;
 
@@ -12,9 +13,18 @@ void *tch()
 {   
 	pthread_mutex_lock(&l1);
 	teach++;
-	printf("\nTEACHER %d IS PLAYING\n",teach);
+	printf("\nTeacher number %d is rocking the Game\n",teach);
 	pcnt++;
 	pthread_mutex_unlock(&l1);
+	sleep(10);// to look after 10 sec is time going to run out or not
+    if(t6->tm_hour>8&&t6->tm_hour<17)
+	{
+		pthread_mutex_lock(&l1);
+		teach--;
+		pcnt--;
+		printf("\nTeacher number %d have been log out due to time out\n",teach);
+	pthread_mutex_unlock(&l1);
+	}
 	pthread_exit(NULL);
 }
 void *stf()
@@ -22,7 +32,7 @@ void *stf()
 	pthread_mutex_lock(&l2);
 	staff++;
 	pcnt++;
-	printf("\nSTAFF %d is PLAYING\n",staff);
+	printf("\nComputer staff number %d is facing problem in battling others\n",staff);
 	pthread_mutex_unlock(&l2);
 	pthread_exit(NULL);
 }
@@ -31,56 +41,86 @@ void *stu()
 	pthread_mutex_lock(&l1);
 	pcnt++;
 	stud++;
-	printf("\nSTUDENT %d is PLAYING\n",stud);
+	printf("\nStudent number %d is cheating in Game\n",stud);
 	pthread_mutex_unlock(&l1);
-    pthread_exit(NULL);
+	sleep(10);     // to look after 10 sec is time going to run out or not
+    if(t6->tm_hour>6&&t6->tm_hour<22)
+	{
+		pthread_mutex_lock(&l2);
+		stud--;
+		pcnt--;
+		printf("\nStudent number %d have been log out due to time out\n",studt);
+	    pthread_mutex_unlock(&l2);
+	}
+	pthread_exit(NULL);
 }
 void *lgin()
 {
 	A:
 	printf("\n1. For Staff\n2. Fosr Student\n3. For Teacher\n4.For Exit\nEnter Your choice :: ");
 	scanf("%d",&x);
+
 	switch(x){
-	case 1:	
-		printf("\nComputer Staff Login \n");
-		printf("\nStaff logged in\n");
-		pthread_create(&t3,NULL,stf,NULL);
-		pthread_join(t3,NULL);
+		case 1:	
+		printf("\nComputer Staff Loging In \n");sleep(1);
+		printf("\nComputer staff logged In\n");
+		pthread_create(&thread_3,NULL,stf,NULL);
+		pthread_join(thread_3,NULL);
+		
 		break;
-	case 2:
-		printf("\nStudent  Login \n");
-		printf("\nStudent logged in\n");pthread_create(&t4,NULL,stu,NULL);
-		pthread_join(t4,NULL);
+		case 2:
+	    t6=localtime(&t);
+	    printf("\n%s\n",asctime(t6));
+		if(t6->tm_hour>=22||t6->tm_hour<=6)
+	    {
+		printf("\nStudent  Loging In \n");sleep(1);
+		printf("\nStudent logged in\n");pthread_create(&thread_4,NULL,stu,NULL);
+		pthread_join(thread_4,NULL);
+		}
+		else 
+		{
+			printf("\nAccess denied due to time-constraint.\nPlease visit in alloted time-slot.\n");
+		}		
 		break;
-	case 3:
-	    
-		printf("\nComputer Teacher Login \n");
-		printf("\nTecher logged in\n");
-		pthread_create(&t5,NULL,tch,NULL);
-		pthread_join(t5,NULL);
+	    case 3:
+	    t6=localtime(&t);
+	    printf("\n%s\n",asctime(t6));
+	    if(t6->tm_hour>=17||t6->tm_hour<=8)
+	    {
+		printf("\nComputer Teacher Login \n");sleep(1);
+		printf("\nTeacher logged in\n");
+		pthread_create(&thread_5,NULL,tch,NULL);
+		pthread_join(thread_5,NULL);}
+		else 
+		{
+			printf("\nAccess denied due to time-constraint.\nPlease visit in alloted time-slot.\n");
+		}
 		break;
-	case 4:
-	       pthread_exit(NULL);
-	default: printf("\nWrong Entry.\nTry again\n");
-	         goto A;
-	         }
+	    case 4:
+	    pthread_exit(NULL);
+	    default: 
+		printf("\nWrong Entry.\nPlease try again\n");
+	    goto A;
+	    }
 	pthread_exit(NULL);}
+	
 void *lgout(){int j;
-	if(teach>0){for(j=1;j<=teach;j++)printf("\n%d Teacher Logged Out\n",j);}
-	if(stud>0){for(j=1;j<=staff;j++)printf("\n%d Staff Logged Out\n",j);}
-	if(staff>0){for(j=1;j<=stud;j++)printf("\n%d Student Logged Out\n",j);}
+	if(teach>0){for(j=1;j<=teach;j++)printf("\nTeacher nunmber %d Logged Out\n",j);}
+	if(stud>0){for(j=1;j<=staff;j++)printf("\nComputer staff number %d Logged Out\n",j);}
+	if(staff>0){for(j=1;j<=stud;j++)printf("\nStudent number %d Logged Out\n",j);}
 }
+	
 void main()
-{
+{	time(&t);
 	printf("\nEnter number of login :: \n");
 	int i;
-	scanf("%d",&h);system("cls");
+	scanf("%d",&h);sleep(1);system("cls");
 	for(i=0;i<h;i++)
-	{system("cls");
-		pthread_create(&t1,NULL,lgin,NULL);
-		pthread_join(t1,NULL);
-		printf("TOTAL NO. OF USERS %d",pcnt);sleep(1);
+	{	system("cls");
+		pthread_create(&thread_1,NULL,lgin,NULL);
+		pthread_join(thread_1,NULL);
+		printf("Total number of GaMeRs %d",pcnt);sleep(1);
 	}
-	pthread_create(&t6,NULL,lgout,NULL);
-	pthread_join(t6,NULL);
+	pthread_create(&thread_6,NULL,lgout,NULL);
+	pthread_join(thread_6,NULL);
 	}
